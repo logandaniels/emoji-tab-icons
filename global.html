@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>global HTML page</title>
+<script type="text/javascript">
+
+var defaultSettings = {
+    sites : {
+        "google.com" : {
+            emoji: "\uD83D\uDD0D" // magnifying glass
+        },
+        "mail.google.com" : {
+            emoji: "\uD83D\uDCEC" // mailbox
+        },
+        "youtube.com" : {
+            emoji: "\uD83C\uDFA5" // movie camera
+        },
+        "stackoverflow.com" : {
+            emoji: "\uD83D\uDCBB" // computer
+        }
+    },
+    "defaultEmoji" : "\uD83C\uDF10" // 'internet' globe
+}
+
+if (safari.extension.settings["firstRun"] === "true") {
+  for (var key in defaultSettings) {
+    safari.extension.settings[key] = defaultSettings[key];
+  }
+  safari.extension.settings["firstRun"] = "false";
+}
+
+function getSettings() {
+  return settings;
+}
+
+function setSettings(newSettings) {
+  for (var key in newSettings) {
+    safari.extension.settings[key] = newSettings[key];
+  }
+  // Update settings in all open tabs
+  sendMessageToAllTabs("getSettings", getSettings());
+}
+
+function sendMessageToAllTabs(message, data) {
+    var bw = safari.application.activeBrowserWindow;
+    for (var i = 0; i < bw.tabs.length; i++) {
+      var tab = bw.tabs[i];
+      tab.page.dispatchMessage(message, data);
+    }
+}
+
+function getSiteSettings(hostname) {
+    if (!safari.extension.settings.sites.hasOwnProperty(hostname)) {
+        return null;
+    }
+    var siteSettings = safari.extension.settings.sites[hostname];
+    console.log("Returning " + siteSettings);
+    return siteSettings;
+}
+  
+
+safari.application.addEventListener("message", function(event) {
+    var bw = safari.application.activeBrowserWindow;
+    switch (event.name) {
+        case "getSiteSettings":
+            event.target.page.dispatchMessage("getSiteSettings", getSiteSettings(event.message));
+            break;
+        case "getSettings":
+            event.target.page.dispatchMessage("getSettings", getSettings());
+            break;
+        case "setSettings":
+            setSettings(event.message);
+            break;
+    }
+}, false);
+
+
+</script>
+</head>
+<body>
+</body>
+</html>
