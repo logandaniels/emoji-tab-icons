@@ -1,0 +1,146 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Emoji Tab Icons Settings</title>
+
+<!-- Bootstrap and jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+
+<!-- Emoji picker styles -->
+<link href="emoji-picker/css/nanoscroller.css" rel="stylesheet">
+<link href="emoji-picker/css/emoji.css" rel="stylesheet">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
+<style>
+.table {
+  border-left: 1px solid #dddddd;
+  border-right: 1px solid #dddddd;
+  border-bottom: 1px solid #dddddd;
+}
+
+.emoji-wysiwyg-editor {
+  overflow: hidden !important;
+}
+</style>
+
+<script type="text/javascript">
+
+var gettingInitialSettings = true;
+
+function setInitialSettings(settings) {
+  for (var settingName in settings) {
+    var input = document.getElementById(settingName);
+    if (input) {
+      input.value = settings[settingName];
+    }
+  }
+}
+
+function validateSettings() {
+    return true;
+}
+
+function saveSettings() {
+  if (!validateSettings()) {
+    var resultNode = document.getElementById("settings-result");
+    resultNode.classList.remove("success");
+    resultNode.classList.add("failure");
+    resultNode.innerText = "Unable to save settings. Please fix any errors and try again.";
+    return;
+  }
+
+  safari.self.tab.dispatchMessage("setSettings", newSettings);
+
+  var resultNode = document.getElementById("settings-result");
+  resultNode.classList.remove("failure");
+  resultNode.classList.add("success");
+  resultNode.innerText = "Settings saved.";
+}
+
+
+function logSettings() {
+  safari.self.tab.dispatchMessage("getSettings");
+
+}
+
+safari.self.addEventListener("message", function(event) {
+    switch (event.name) {
+      case "getSettings":
+        if (gettingInitialSettings) {
+          setInitialSettings(event.message);
+          gettingInitialSettings = false;
+        }
+        break;
+    }
+}, false);
+
+window.addEventListener("load", function () {
+  // Add listeners
+
+  // Get initial settings
+  safari.self.tab.dispatchMessage("getSettings");
+});
+</script>
+
+
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 col-centered">
+          <div class="checkbox clearfix">
+            <label>
+              <input type="checkbox">Show default tab icon
+            </label>
+          </div>
+          <div>
+            <table class="table table-striped">
+              <tr><th>URL</th><th>Icon</th><th></th></tr>
+              <tr>
+                <td>google.com</td>
+                <td><div style="position: relative"><input class="input-lg" data-emojiable="true" type="text"></td></div>
+                <td>
+                  <button type="button" class="close" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>youtube.com</td>
+                <td><div style="position: relative"><input data-emojiable="true" type="text"></div></td>
+                <td>
+                  <button type="button" class="close" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </td>
+              </tr>
+            </table>
+          </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Emoji picker scripts -->
+<script src="emoji-picker/js/nanoscroller.min.js"></script>
+<script src="emoji-picker/js/tether.min.js"></script>
+<script src="emoji-picker/js/config.js"></script>
+<script src="emoji-picker/js/util.js"></script>
+<script src="emoji-picker/js/jquery.emojiarea.js"></script>
+<script src="emoji-picker/js/emoji-picker.js"></script>
+ <script>
+    $(function() {
+      window.emojiPicker = new EmojiPicker({
+        emojiable_selector: '[data-emojiable=true]',
+        assetsPath: 'emoji-picker/img/',
+        popupButtonClasses: 'fa fa-smile-o'
+      });
+      window.emojiPicker.discover();
+    });
+</script>
+</body>
+</html>
