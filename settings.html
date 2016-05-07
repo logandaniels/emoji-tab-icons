@@ -130,6 +130,11 @@ function removeSite(hostname) {
   var row = $('.site-row[data-site-name="' + hostname + '"]').remove();
 }
 
+function clearAllSites() {
+  settings.sites = [];
+  $('.site-row').remove();
+}
+
 function getSiteSettings(hostname) {
   for (var i = 0; i < settings.sites.length; i++) {
     if (settings.sites[i].hostname == hostname) {
@@ -202,6 +207,7 @@ window.addEventListener("load", function () {
   $("#add-site-button").on("click", function (event) {
     addSiteButtonPressed();
   });
+  $("#clear-all-button").on("click", function () { clearAllSites();});
   $("#save-button").on("click", function () { saveSettings();});
   $("#show-default-icon-checkbox").on("change", onDefaultIconCheckboxChanged);
 });
@@ -230,8 +236,9 @@ window.addEventListener("load", function () {
               <input type="checkbox">Suppress tab icon in history
             </label>
           </div>
-          <div class="clearfix"></div>
-          <div class="space-top">
+          <div style="margin-top: 50px" class="clearfix"></div>
+          <a id="clear-all-button" class="pull-right" href="#">Clear all</a>
+          <div>
             <table class="table table-striped">
               <thead id="sites-table-header">
                 <tr><th>URL</th><th>Icon</th><th></th></tr>
