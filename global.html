@@ -5,20 +5,22 @@
 <script type="text/javascript">
 
 var defaultSettings = {
-    sites : {
-        "google.com" : {
-            emoji: "\uD83D\uDD0D" // magnifying glass
-        },
-        "mail.google.com" : {
-            emoji: "\uD83D\uDCEC" // mailbox
-        },
-        "youtube.com" : {
-            emoji: "\uD83C\uDFA5" // movie camera
-        },
-        "stackoverflow.com" : {
-            emoji: "\uD83D\uDCBB" // computer
-        }
-    },
+    sites : [
+      {
+        hostname: "google.com",
+        emoji: "\uD83D\uDD0D" // magnifying glass
+      },
+      {
+        hostname : "mail.google.com",
+        emoji : "\uD83D\uDCEC" // mailbox
+      },
+      { hostname : "youtube.com",
+        emoji : "\uD83C\uDFA5" // movie camera
+      },
+      { hostname : "stackoverflow.com",
+        emoji : "\uD83D\uDCBB" // computer
+      }
+    ],
     "defaultEmoji" : "\uD83C\uDF10" // 'internet' globe
 }
 
@@ -30,11 +32,18 @@ if (safari.extension.settings["firstRun"] === "true") {
 }
 
 function getSettings() {
+  var settings = {};
+  Object.getOwnPropertyNames(safari.extension.settings).forEach(function(settingName) {
+    settings[settingName] = safari.extension.settings[settingName];
+  });
   return settings;
 }
 
 function setSettings(newSettings) {
   for (var key in newSettings) {
+    if (key === "openSettings") {
+      continue;
+    }
     safari.extension.settings[key] = newSettings[key];
   }
   // Update settings in all open tabs
@@ -50,12 +59,24 @@ function sendMessageToAllTabs(message, data) {
 }
 
 function getSiteSettings(hostname) {
-    if (!safari.extension.settings.sites.hasOwnProperty(hostname)) {
-        return null;
+  for (var i = 0; i < safari.extension.settings.sites.length; i++) {
+    if (safari.extension.settings.sites[i].hostname == hostname) {
+      return safari.extension.settings.sites[i];
     }
-    var siteSettings = safari.extension.settings.sites[hostname];
-    console.log("Returning " + siteSettings);
-    return siteSettings;
+  }
+  return null;
+}
+
+function openSettings() {
+  var bw = safari.application.activeBrowserWindow;
+  var tab = bw.openTab("foreground");
+  tab.url = safari.extension.baseURI + "settings.html";
+
+  // Remove listener while we reset the openSettings setting to
+  // avoid triggering an infinite loop.
+  safari.extension.settings.removeEventListener("change", handleSettingsChange);
+  safari.extension.settings.openSettings = false;
+  safari.extension.settings.addEventListener("change", handleSettingsChange);
 }
   
 
@@ -74,6 +95,15 @@ safari.application.addEventListener("message", function(event) {
     }
 }, false);
 
+function handleSettingsChange(event) {
+  switch (event.key) {
+    case "openSettings":
+      openSettings();
+      break;
+  }
+}
+
+safari.extension.settings.addEventListener("change", handleSettingsChange, false);
 
 </script>
 </head>

@@ -8,5 +8,15 @@
 		<key>Key</key>
 		<string>firstRun</string>
 	</dict>
+	<dict>
+		<key>DefaultValue</key>
+		<string>false</string>
+		<key>Key</key>
+		<string>openSettings</string>
+		<key>Title</key>
+		<string>Open Settings page</string>
+		<key>Type</key>
+		<string>CheckBox</string>
+	</dict>
 </array>
 </plist>

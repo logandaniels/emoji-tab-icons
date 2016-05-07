@@ -18,10 +18,6 @@
 <link href="emoji-picker/css/emoji.css" rel="stylesheet">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 
-<script type="text/x-handlebars-template" id="site-container-header-template">
-  <tr><th>URL</th><th>Icon</th><th></th></tr>
-</script>
-
 <script type="text/x-handlebars-template" id="site-entry-template">
   <tr class="site-row" data-site-name="{{siteName}}">
     <td class="site-name-cell">{{siteName}}</td>
@@ -42,17 +38,19 @@
 .emoji-wysiwyg-editor {
   overflow: hidden !important;
 }
+
+.space-top {
+  margin-top: 40px;
+}
 </style>
 
 <script type="text/javascript">
 
 var settings = {sites : [{hostname: "google.com", emoji: "lol"}, {hostname: "youtube.com", emoji: "ayy"}]};
+var gettingInitialSettings = true;
 
 function updateSitesFromSettings() {
   var container = $("#sites-table-body");
-  var header = $("#sites-table-header");
-  header.append(Handlebars.compile($("#site-container-header-template").html())());
-
   var sites = settings.sites;
 
   container.empty();
@@ -99,14 +97,12 @@ function attachSiteListeners(hostname) {
     // Add a listener for clicking the delete button on the row
     row.find("button").on("click", function(event) {
         removeSite(hostname);
-        saveSettings();
     });
 
     // Update site emoji whenever the text area is changed
     row.find('[contenteditable="true"]').on("blur keyup paste", function(event) {
         var site = getSiteSettings(hostname);
         site.emoji = getInputIconText(hostname);
-        saveSettings();
     });
 }
 
@@ -137,42 +133,48 @@ function validateSettings() {
 }
 
 function saveSettings() {
-  if (false && !validateSettings()) {
+  /*if (false && !validateSettings()) {
     var resultNode = document.getElementById("settings-result");
     resultNode.classList.remove("success");
     resultNode.classList.add("failure");
     resultNode.innerText = "Unable to save settings. Please fix any errors and try again.";
     return;
-  }
+  }*/
 
   safari.self.tab.dispatchMessage("setSettings", settings);
 
+  /*
   var resultNode = document.getElementById("settings-result");
   resultNode.classList.remove("failure");
   resultNode.classList.add("success");
   resultNode.innerText = "Settings saved.";
+  */
 }
 
-/*
+
 safari.self.addEventListener("message", function(event) {
     switch (event.name) {
       case "getSettings":
-          settings = event.message;
-          updateSitesFromSettings();
+          if (gettingInitialSettings) {
+            settings = event.message;
+            updateSitesFromSettings();
+            gettingInitialSettings = false;
+          }
         break;
     }
 }, false);
-*/
+
 
 
 window.addEventListener("load", function () {
   // Get initial settings
-  //safari.self.tab.dispatchMessage("getSettings");
+  safari.self.tab.dispatchMessage("getSettings");
 
   // Add listeners
   $("#add-site-button").on("click", function (event) {
     addSiteButtonPressed();
   });
+  $("#save-button").on("click", function () { saveSettings();});
 });
 
 </script>
@@ -182,24 +184,38 @@ window.addEventListener("load", function () {
 <body>
   <div class="container">
     <div class="row">
-      <div class="col-md-6 col-centered">
-          <div class="checkbox clearfix">
+      <div class="col-md-6 clearfix col-centered">
+          <div class="checkbox space-top pull-left">
             <label>
               <input type="checkbox">Show default tab icon
             </label>
           </div>
-          <div>
+          <div class="clearfix"></div>
+          <div class="checkbox pull-left clearfix">
+            <label>
+              <input type="checkbox">Suppress tab icon in history
+            </label>
+          </div>
+          <div class="clearfix"></div>
+          <div class="space-top">
             <table class="table table-striped">
               <thead id="sites-table-header">
+                <tr><th>URL</th><th>Icon</th><th></th></tr>
               </thead>
               <tbody id="sites-table-body">
               </tbody>
             </table>
           </div>
-          <p class="pull-right">
+          <div class="clearfix">
+          <div class="pull-right">
             <input id="add-site-input" type="text">
             <button id="add-site-button" type="button" class="btn btn-primary btn-sm">Add site</button>
-          </p>
+          </div>
+          <div class="clearfix"></div>
+          <div class="space-top pull-right">
+            <button id="save-button" type="button" class="btn btn-default btn-sm">Save settings</button>
+          </div>
+          </div>
       </div>
     </div>
   </div>
