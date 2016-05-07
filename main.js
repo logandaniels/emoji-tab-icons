@@ -2,9 +2,9 @@
 // have one instance of the script per tab
 if (window.top === window) {
 
+var emoji = null;
 var settings = null;
 var siteSettings = null;
-var shouldWatch = false;
 var rawTitle = null;
 
 function getRandomInt(min, max) {
@@ -16,7 +16,6 @@ function updateTitle() {
     // Safari hides that prefix from all of the tab titles.
     // To prevent our tab icons from being hidden, we prefix
     // the tab title with a random number of zero-width characters.
-    var emoji = getEmoji();
     if (emoji) {
       var spacer = "\u200B".repeat(getRandomInt(1,500));
       document.title = spacer + emoji + " " + rawTitle;   
@@ -50,7 +49,22 @@ function getHostname() {
 }
 
 function addTitleWatcher() {
-    console.log("Not yet implemented.");
+  var target = document.querySelector('head > title');
+  var observer = new window.WebKitMutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      var newTitle = mutation.target.textContent;
+      /* If the new title includes our emoji, then either
+         a) this event was triggered by the extension itself, or
+         b) the site we're on preserved the emoji we added before
+         changing the title. In either case, we should ignore the event.
+      */
+      if (newTitle.indexOf(emoji) === -1) {
+        rawTitle = newTitle;
+        updateTitle();
+      }
+    });
+  });
+  observer.observe(target, { subtree: true, characterData: true, childList: true });
 }
 
 safari.self.addEventListener("message", function(event) {
@@ -58,7 +72,9 @@ safari.self.addEventListener("message", function(event) {
       case "getSettings":
         settings = event.message;
         siteSettings = getSiteSettings(getHostname());
+        emoji = getEmoji();
         updateTitle();
+        addTitleWatcher();
         break;
     }
 }, false);
@@ -66,9 +82,5 @@ safari.self.addEventListener("message", function(event) {
 rawTitle = document.title;
 
 safari.self.tab.dispatchMessage("getSettings");
-
-if (shouldWatch) {
-    addTitleWatcher();
-}
 
 }
