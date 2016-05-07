@@ -25,6 +25,10 @@
 	var TAGS_BLOCK = [ 'p', 'div', 'pre', 'form' ];
 	var KEY_ESC = 27;
 	var KEY_TAB = 9;
+	/* Keys that are not intercepted and canceled when the textbox has reached its max length:
+	 	   Backspace, Tab, Ctrl, Alt, Left Arrow, Up Arrow, Right Arrow, Down Arrow, Cmd Key, Delete
+	*/
+	var MAX_LENGTH_ALLOWED_KEYS = [8, 9, 17, 18, 37, 38, 39, 40, 91, 46];
 	
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -370,13 +374,34 @@
 
     var editorDiv = this.$editor;
 		this.$editor.on("change keydown keyup resize scroll", function(e) {
-
-      if(e.which != 8 && editorDiv.text().length + editorDiv.find('img').length >= editorDiv.attr('maxlength'))
+      if(MAX_LENGTH_ALLOWED_KEYS.indexOf(e.which) == -1 &&
+				!((e.ctrlKey || e.metaKey) && e.which == 65) && // Ctrl + A
+				!((e.ctrlKey || e.metaKey) && e.which == 67) && // Ctrl + C
+				editorDiv.text().length + editorDiv.find('img').length >= editorDiv.attr('maxlength'))
       {
         e.preventDefault();
       }
       self.updateBodyPadding(editorDiv);
     });
+
+		if (this.options.onPaste) {
+			var self = this;
+			this.$editor.on("paste", function (e) {
+				e.preventDefault();
+
+				if ((e.originalEvent || e).clipboardData) {
+					var content = (e.originalEvent || e).clipboardData.getData('text/plain');
+					var finalText = self.options.onPaste(content);
+					document.execCommand('insertText', false, finalText);
+				}
+				else if (window.clipboardData) {
+					var content = window.clipboardData.getData('Text');
+					var finalText = self.options.onPaste(content);
+					document.selection.createRange().pasteHTML(finalText);
+				}
+				editorDiv.scrollTop(editorDiv[0].scrollHeight);
+			});
+		}
 
     $textarea.after("<i class='emoji-picker-icon emoji-picker " + this.options.popupButtonClasses + "' data-id='" + id + "' data-type='picker'></i>");
 

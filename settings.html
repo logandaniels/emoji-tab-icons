@@ -42,6 +42,10 @@
 .space-top {
   margin-top: 40px;
 }
+
+.editor-disabled {
+  opacity: .5;
+}
 </style>
 
 <script type="text/javascript">
@@ -49,7 +53,20 @@
 var settings = {sites : [{hostname: "google.com", emoji: "lol"}, {hostname: "youtube.com", emoji: "ayy"}]};
 var gettingInitialSettings = true;
 
-function updateSitesFromSettings() {
+function applySettings() {
+  // Checkboxes
+  $("#show-default-icon-checkbox").prop("checked", settings.showDefaultTabIcon);
+  var emojiEditor = $("#show-default-icon-input").next();
+  emojiEditor.html(settings.defaultTabIcon);
+  emojiEditor.on("blur keyup paste", function(event) {
+    settings.defaultTabIcon = $("#show-default-icon-input").val();
+  });
+
+  if (settings.showDefaultTabIcon) {
+    $("#show-default-icon-input").parent().removeClass("editor-disabled");
+  }
+
+  // Site settings table
   var container = $("#sites-table-body");
   var sites = settings.sites;
 
@@ -76,7 +93,7 @@ function updateSitesFromSettings() {
 function addSiteButtonPressed() {
   var hostname = $("#add-site-input").val();
   if (getSiteSettings(hostname)) {
-    // An entry already exists
+    // An entry for this site already exists
     return;
   }
   var container = $("#sites-table-body");
@@ -151,13 +168,24 @@ function saveSettings() {
   */
 }
 
+function onDefaultIconCheckboxChanged(event) {
+  if (event.target.checked) {
+    $("#show-default-icon-input").parent().removeClass("editor-disabled");
+    settings.showDefaultTabIcon = true;
+    
+  } else {
+    $("#show-default-icon-input").parent().addClass("editor-disabled");
+    settings.showDefaultTabIcon = false;
+  }
+}
+
 
 safari.self.addEventListener("message", function(event) {
     switch (event.name) {
       case "getSettings":
           if (gettingInitialSettings) {
             settings = event.message;
-            updateSitesFromSettings();
+            applySettings();
             gettingInitialSettings = false;
           }
         break;
@@ -175,6 +203,7 @@ window.addEventListener("load", function () {
     addSiteButtonPressed();
   });
   $("#save-button").on("click", function () { saveSettings();});
+  $("#show-default-icon-checkbox").on("change", onDefaultIconCheckboxChanged);
 });
 
 </script>
@@ -185,10 +214,15 @@ window.addEventListener("load", function () {
   <div class="container">
     <div class="row">
       <div class="col-md-6 clearfix col-centered">
-          <div class="checkbox space-top pull-left">
+          <h1>Emoji Tab Icons <small>| Settings</small></h1>
+          <hr>
+          <div class="checkbox">
             <label>
-              <input type="checkbox">Show default tab icon
+                <input id="show-default-icon-checkbox" type="checkbox">Show default tab icon:
             </label>
+            <div class="editor-disabled" style="display: inline-block; width:100px; position: relative">
+              <input id="show-default-icon-input" type="text" data-emojiable="true" disabled>
+            </div>
           </div>
           <div class="clearfix"></div>
           <div class="checkbox pull-left clearfix">
@@ -234,9 +268,8 @@ window.addEventListener("load", function () {
         assetsPath: 'emoji-picker/img/',
         popupButtonClasses: 'fa fa-smile-o'
       });
-//      window.emojiPicker.discover();
+      window.emojiPicker.discover();
     });
-setTimeout(updateSitesFromSettings, 100);
 </script>
 </body>
 </html>
