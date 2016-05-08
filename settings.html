@@ -30,6 +30,18 @@
   </tr>
 </script>
 
+<script type="text/x-handlebars-template" id="suggested-site-template">
+  <tr class="suggested-site-row" data-site-name="{{siteName}}">
+    <td class="suggested-site-name-cell">{{siteName}}</td>
+    <td><div class="emoji-label">{{emoji}}</div></td>
+    <td>
+      <button type="button" class="btn btn-success btn-sm">
+        Add
+      </button>
+    </td>
+  </tr>
+</script>
+
 <style>
 .table {
   border: 1px solid #dddddd;
@@ -72,40 +84,36 @@ function applySettings() {
 
   container.empty();
   for (var i = 0; i < sites.length; i++) {
-    var container = $("#sites-table-body");
-    var args = {
-      siteName: sites[i].hostname
-    };
-    container.append(Handlebars.compile($("#site-entry-template").html())(args));
+    addSite(sites[i].hostname, sites[i].emoji);
   }
 
-  window.emojiPicker.discover();
-
-  for (var i = 0; i < sites.length; i++) {
-    // Set initial icon text
-    var row = $('.site-row[data-site-name="' + sites[i].hostname + '"]');
-    row.find(".emoji-wysiwyg-editor").first().html(sites[i].emoji);
-
-    attachSiteListeners(sites[i].hostname);
-  }
 }
 
 function addSiteButtonPressed() {
   var hostname = $("#add-site-input").val();
-  if (getSiteSettings(hostname)) {
-    // An entry for this site already exists
+  if (hostname.length === 0 || getSiteSettings(hostname)) {
     return;
   }
+
+  addSite(hostname, "");
+  settings.sites.push({hostname: hostname, emoji: ""});
+
+  $("#add-site-input").val("");
+}
+
+function addSite(hostname, emoji) {
   var container = $("#sites-table-body");
   var args = {
-    siteName: hostname
+    siteName: hostname,
+    emoji: emoji
   };
   container.append(Handlebars.compile($("#site-entry-template").html())(args));
-  window.emojiPicker.discover();
-  attachSiteListeners(hostname);
-  $("#add-site-input").val("");
 
-  settings.sites.push({hostname: hostname, emoji: ""});
+  window.emojiPicker.discover();
+  var row = $('.site-row[data-site-name="' + hostname + '"]');
+  row.find(".emoji-wysiwyg-editor").first().html(emoji);
+
+  attachSiteListeners(hostname);
 }
 
 function attachSiteListeners(hostname) {
@@ -184,6 +192,55 @@ function onDefaultIconCheckboxChanged(event) {
   }
 }
 
+function populateSuggestedSites() {
+  var suggestedSites = [
+    ["nytimes.com", "\uD83D\uDCF0"],
+    ["instagram.com", "\uD83D\uDCF7"],
+    ["calendar.google.com", "\uD83D\uDCC5"],
+    ["messenger.com", "\uD83D\uDCAC"],
+    ["pinterest.com", "\uD83D\uDCCC"],
+    ["soundcloud.com", "\uD83C\uDFB5"],
+    ["twitter.com", "\uD83D\uDC26"],
+    ["reddit.com", "\uD83D\uDC7D"],
+    ["facebook.com", "\uD83D\uDC64"],
+    ["amazon.com", "\uD83D\uDCE6"],
+    ["wikipedia.org", "\uD83D\uDCD6"],
+    ["netflix.com", "\uD83C\uDFAC"],
+    ["espn.com", "\uD83C\uDFC0"]
+  ];
+
+  suggestedSites = suggestedSites.filter(function(site) {
+    var siteSettings = getSiteSettings(site[0]);
+    return siteSettings == null;
+  });
+
+  var tableBody = $("#suggested-sites-table-body");
+
+  suggestedSites.forEach(function(site) {
+    var args = {
+      siteName: site[0],
+      emoji: site[1]
+    };
+    tableBody.append(Handlebars.compile($("#suggested-site-template").html())(args));
+    tableBody.find('[data-site-name="' + site[0] + '"]').find("button").on("click", (function(hostname, emoji) {
+      return function(event) {
+        addSite(hostname, emoji);
+        settings.sites.push({hostname: hostname, emoji: emoji});
+        $("#suggested-sites-table-body").find('[data-site-name="' + hostname + '"]').remove();
+      };})(site[0], site[1]))
+  });
+}
+
+function showSuggestedSites(event) {
+  if (event.target.innerText.indexOf("Show") > -1) {
+    $("#suggested-sites-table").show(400);
+    event.target.innerText = "Hide suggested sites";
+  } else {
+    $("#suggested-sites-table").hide(400);
+    event.target.innerText = "Show suggested sites";
+  }
+}
+
 
 safari.self.addEventListener("message", function(event) {
     switch (event.name) {
@@ -191,6 +248,7 @@ safari.self.addEventListener("message", function(event) {
           if (gettingInitialSettings) {
             settings = event.message;
             applySettings();
+            populateSuggestedSites();
             gettingInitialSettings = false;
           }
         break;
@@ -210,6 +268,8 @@ window.addEventListener("load", function () {
   $("#clear-all-button").on("click", function () { clearAllSites();});
   $("#save-button").on("click", function () { saveSettings();});
   $("#show-default-icon-checkbox").on("change", onDefaultIconCheckboxChanged);
+  $("#suggested-sites-table").hide();
+  $("#show-suggested-sites").click(showSuggestedSites);
 });
 
 </script>
@@ -251,6 +311,18 @@ window.addEventListener("load", function () {
           <div class="pull-right">
             <input id="add-site-input" type="text">
             <button id="add-site-button" type="button" class="btn btn-primary btn-sm">Add site</button>
+          </div>
+          <div>
+            <a id="show-suggested-sites" href="#show">Show suggested sites</a>
+            <div>
+              <table id="suggested-sites-table" class="table table-striped" style="width: 50%">
+                <thead>
+                  <tr><th>URL</th><th>Icon</th><th></th></tr>
+                </thead>
+                <tbody id="suggested-sites-table-body">
+                </tbody>
+              </table>
+            </div>
           </div>
           <div class="clearfix"></div>
           <div class="space-top pull-right">
