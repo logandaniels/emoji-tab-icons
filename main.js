@@ -3,6 +3,7 @@
 if (window.top === window) {
 
 var emoji = null;
+var observer = null;
 var settings = null;
 var siteSettings = null;
 var rawTitle = null;
@@ -50,7 +51,7 @@ function getHostname() {
 
 function addTitleWatcher() {
   var target = document.querySelector('head > title');
-  var observer = new window.WebKitMutationObserver(function(mutations) {
+  observer = new window.WebKitMutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
       var newTitle = mutation.target.textContent;
       /* If the new title includes our emoji, then either
@@ -66,6 +67,16 @@ function addTitleWatcher() {
   });
   observer.observe(target, { subtree: true, characterData: true, childList: true });
 }
+
+// Restore the title before navigating away so that the
+// history entry for the site doesn't include the emoji
+// (unnecessary since history shows the favicon)
+window.addEventListener("beforeunload", function(event) {
+  if (observer != null) {
+    observer.disconnect();
+  }
+  document.title = rawTitle;
+});
 
 safari.self.addEventListener("message", function(event) {
     switch (event.name) {
