@@ -5,6 +5,7 @@
 
 <!-- Bootstrap and jQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-scrollTo/2.1.0/jquery.scrollTo.min.js"></script>
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
@@ -173,6 +174,10 @@ function saveSettings() {
 
   safari.self.tab.dispatchMessage("setSettings", settings);
 
+  $("#save-alert").addClass("in");
+  setTimeout(function () { $("#save-alert").removeClass("in");}, 3000);
+  
+
   /*
   var resultNode = document.getElementById("settings-result");
   resultNode.classList.remove("failure");
@@ -226,7 +231,17 @@ function populateSuggestedSites() {
       return function(event) {
         addSite(hostname, emoji);
         settings.sites.push({hostname: hostname, emoji: emoji});
-        $("#suggested-sites-table-body").find('[data-site-name="' + hostname + '"]').remove();
+        var thisRow = $("#suggested-sites-table-body").find('[data-site-name="' + hostname + '"]');
+        // Weird animation hack from StackOverflow to smoothly hide the row
+        thisRow.children('td, th')
+            .animate({
+            padding: 0
+        })
+            .wrapInner('<div />')
+            .children()
+            .slideUp(function () {
+            $(this).closest('tr').remove();
+            });
       };})(site[0], site[1]))
   });
 }
@@ -234,9 +249,11 @@ function populateSuggestedSites() {
 function showSuggestedSites(event) {
   if (event.target.innerText.indexOf("Show") > -1) {
     $("#suggested-sites-table").show(400);
+    $.scrollTo($("#suggested-sites-table"), 400);
     event.target.innerText = "Hide suggested sites";
   } else {
     $("#suggested-sites-table").hide(400);
+    $.scrollTo(0, 400);
     event.target.innerText = "Show suggested sites";
   }
 }
@@ -279,7 +296,7 @@ window.addEventListener("load", function () {
 <body>
   <div class="container">
     <div class="row">
-      <div class="col-md-6 clearfix col-centered">
+      <div class="col-md-6 clearfix">
           <h1>Emoji Tab Icons <small>| Settings</small></h1>
           <hr>
           <div class="checkbox">
@@ -306,9 +323,11 @@ window.addEventListener("load", function () {
             <input id="add-site-input" type="text">
             <button id="add-site-button" type="button" class="btn btn-primary btn-sm">Add site</button>
           </div>
+          <div class="clearfix"></div>
           <div>
             <a id="show-suggested-sites" href="#show">Show suggested sites</a>
-            <div>
+            <div class="clearfix"></div>
+            <div class="pull-left">
               <table id="suggested-sites-table" class="table table-striped" style="width: 50%">
                 <thead>
                   <tr><th>URL</th><th>Icon</th><th></th></tr>
@@ -318,11 +337,11 @@ window.addEventListener("load", function () {
               </table>
             </div>
           </div>
-          <div class="clearfix"></div>
-          <div class="space-top pull-right">
-            <button id="save-button" type="button" class="btn btn-default btn-sm">Save settings</button>
+          <div style="width:150px" id="save-container" class="pull-right">
+            <div id="save-alert" class="alert alert-success fade"><p>Settings saved.</p></div>
+            <button id="save-button" type="button" class="btn btn-default btn-sm pull-right">Save settings</button>
           </div>
-          </div>
+        </div>
       </div>
     </div>
   </div>
