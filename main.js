@@ -68,16 +68,6 @@ function addTitleWatcher() {
   observer.observe(target, { subtree: true, characterData: true, childList: true });
 }
 
-// Restore the title before navigating away so that the
-// history entry for the site doesn't include the emoji
-// (unnecessary since history shows the favicon)
-window.addEventListener("beforeunload", function(event) {
-  if (observer != null) {
-    observer.disconnect();
-  }
-  document.title = rawTitle;
-});
-
 safari.self.addEventListener("message", function(event) {
     switch (event.name) {
       case "getSettings":
