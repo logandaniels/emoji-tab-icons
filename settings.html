@@ -44,6 +44,10 @@
 </script>
 
 <style>
+h1 {
+    margin-bottom: 0px;
+}
+
 .table {
   border: 1px solid #dddddd;
 }
@@ -208,7 +212,7 @@ function populateSuggestedSites() {
     ["twitter.com", "\uD83D\uDC26"],
     ["reddit.com", "\uD83D\uDC7D"],
     ["facebook.com", "\uD83D\uDC64"],
-    ["amazon.com", "\uD83D\uDCE6"],
+    ["amazon.com", "\uD83C\uDFF7"],
     ["wikipedia.org", "\uD83D\uDCD6"],
     ["netflix.com", "\uD83C\uDFAC"],
     ["espn.com", "\uD83C\uDFC0"]
@@ -296,9 +300,11 @@ window.addEventListener("load", function () {
 <body>
   <div class="container">
     <div class="row">
-      <div class="col-md-6 clearfix">
+      <div class="col-md-6 col-md-offset-3 clearfix">
           <h1>Emoji Tab Icons <small>| Settings</small></h1>
-          <hr>
+          <small class="pull-right"><a href="mailto:logiedan@gmail.com">Send feedback</a></small>
+          <div style="height: 0px" class="clearfix"></div>
+          <hr class="clearfix">
           <div class="checkbox">
             <label>
                 <input id="show-default-icon-checkbox" type="checkbox">Show default tab icon:
