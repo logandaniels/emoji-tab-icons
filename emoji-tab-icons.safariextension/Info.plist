@@ -47,6 +47,8 @@
 			<string>All</string>
 		</dict>
 	</dict>
+	<key>Update Manifest URL</key>
+	<string>https://github.com/logandaniels/emoji-tab-icons/raw/v1/UpdateManifest.plist</string>
 	<key>Website</key>
 	<string>https://github.com/logandaniels/emoji-tab-icons</string>
 </dict>
