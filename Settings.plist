@@ -14,7 +14,7 @@
 		<key>Key</key>
 		<string>openSettings</string>
 		<key>Title</key>
-		<string>Open Settings page</string>
+		<string>Toggle this checkbox to open Settings page</string>
 		<key>Type</key>
 		<string>CheckBox</string>
 	</dict>

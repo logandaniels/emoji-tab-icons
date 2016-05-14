@@ -31,6 +31,8 @@
 			</array>
 		</dict>
 	</dict>
+	<key>Description</key>
+	<string>Add emoji to tab titles to easily identify what websites you have open.</string>
 	<key>DeveloperIdentifier</key>
 	<string>0000000000</string>
 	<key>ExtensionInfoDictionaryVersion</key>
@@ -45,5 +47,7 @@
 			<string>All</string>
 		</dict>
 	</dict>
+	<key>Website</key>
+	<string>https://github.com/logandaniels/emoji-tab-icons</string>
 </dict>
 </plist>
