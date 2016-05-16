@@ -7,14 +7,21 @@
      <dict>
        <key>CFBundleIdentifier</key>
        <string>com.logandaniels.emoji-tab-icons</string>
+
        <key>Developer Identifier</key>
-       <string>TODO</string>
+       <string>ZR23WUKXP7</string>
+
        <key>CFBundleVersion</key>
        <string>1</string>
+
        <key>CFBundleShortVersionString</key>
        <string>1.0</string>
+
        <key>URL</key>
        <string>https://github.com/logandaniels/emoji-tab-icons/raw/v1/emoji-tab-icons.safariextz</string>
+
+       <key>Update From Gallery</key>
+       <true/>
      </dict>
    </array>
 </dict>
