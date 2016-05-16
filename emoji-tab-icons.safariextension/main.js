@@ -16,9 +16,8 @@ function updateTitle() {
     // Hack: If multiple tabs in Safari share the same prefix,
     // Safari hides that prefix from all of the tab titles.
     // To prevent our tab icons from being hidden, we prefix
-    // the tab title with a random number of zero-width characters.
+    // each tab title with a unique number of zero-width characters.
     if (emoji) {
-      var spacer = "\u200B".repeat(getRandomInt(1,500));
       document.title = spacer + emoji + " " + rawTitle;   
     } else {
       document.title = rawTitle;
@@ -74,6 +73,10 @@ safari.self.addEventListener("message", function(event) {
         settings = event.message;
         siteSettings = getSiteSettings(getHostname());
         emoji = getEmoji();
+        safari.self.tab.dispatchMessage("getTabIconSpacer", emoji);
+        break;
+      case "getTabIconSpacer":
+        spacer = event.message;
         updateTitle();
         addTitleWatcher();
         break;

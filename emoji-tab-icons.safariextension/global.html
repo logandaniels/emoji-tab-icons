@@ -25,6 +25,9 @@ var defaultSettings = {
     showDefaultTabIcon : false
 }
 
+var spacersInUse = {};
+var spacerRequests = 0;
+
 if (safari.extension.settings["firstRun"] === "true") {
   for (var key in defaultSettings) {
     safari.extension.settings[key] = defaultSettings[key];
@@ -59,6 +62,59 @@ function sendMessageToAllTabs(message, data) {
     }
 }
 
+function getShortestUnusedSpacer(emoji) {
+  // Every 10 requests, scan tabs and update spacer usage to account
+  // for closed tabs and page navigation. This avoids having to
+  // maintain state about open tabs and their locations
+  if (spacerRequests >= 10) {
+    spacersInUse = {};
+    scanTabIcons();
+    spacerRequests = 0;
+  } else {
+    spacerRequests++;
+  }
+
+
+  if (emoji in spacersInUse) {
+    var spacer = "\u200B";
+    while (spacersInUse[emoji].indexOf(spacer) > -1) {
+      spacer += "\u200B";
+    }
+    spacersInUse[emoji].push(spacer);
+    return spacer;
+  } else {
+    spacersInUse[emoji] = ["\u200B"]; 
+    return "\u200B";
+  }
+}
+
+function scanTabIcons() {
+  var bw = safari.application.activeBrowserWindow;
+  bw.tabs.forEach(function(tab) {
+    var title = tab.title;
+    if (!title || title[0] !== "\u200B") {
+      // Tab has no title or no spacer, so tab must not have an emoji icon
+      return;
+    }
+    var spacer = "\u200B";
+    for (var i = 1; i < title.length; i++) {
+      var c = title[i];
+      if (c === "\u200B") {
+        spacer += "\u200B";
+      } else {
+        // First char after spacer should be the emoji icon
+        var icon = String.fromCodePoint(title.codePointAt(i));
+        if (icon in spacersInUse) {
+          spacersInUse[icon].push(spacer);
+        } else {
+          spacersInUse[icon] = [spacer];
+        }
+        return;
+      }
+    }
+  });
+}
+
 function getSiteSettings(hostname) {
   for (var i = 0; i < safari.extension.settings.sites.length; i++) {
     if (safari.extension.settings.sites[i].hostname == hostname) {
@@ -86,6 +142,10 @@ safari.application.addEventListener("message", function(event) {
     switch (event.name) {
         case "getSiteSettings":
             event.target.page.dispatchMessage("getSiteSettings", getSiteSettings(event.message));
+            break;
+        case "getTabIconSpacer":
+            var spacer = getShortestUnusedSpacer(event.message);
+            event.target.page.dispatchMessage("getTabIconSpacer", spacer);
             break;
         case "getSettings":
             event.target.page.dispatchMessage("getSettings", getSettings());
