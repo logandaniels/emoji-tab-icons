@@ -85,6 +85,24 @@ safari.self.addEventListener("message", function(event) {
 
 rawTitle = document.title;
 
+/* When you type a URL into the address bar, Safari starts
+ to preload the page even before you hit enter. If the global
+ extension page sends a getSettings response before you hit enter,
+ the content script won't actually receive the message, so it won't
+ know the extension settings. To fix this issue, we add an event
+ listener so that when the preloaded page becomes visible we send
+ another getSettings message to the global extension page.
+*/
+
 safari.self.tab.dispatchMessage("getSettings");
+function visibilityListener(e) {
+  if (!document.hidden) {
+    if (!settings) {
+      safari.self.tab.dispatchMessage("getSettings");
+    }
+    document.removeEventListener("visibilitychange", visibilityListener);
+  }
+}
+document.addEventListener("visibilitychange", visibilityListener);
 
 }
