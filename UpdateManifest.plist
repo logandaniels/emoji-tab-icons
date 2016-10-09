@@ -12,13 +12,13 @@
        <string>ZR23WUKXP7</string>
 
        <key>CFBundleVersion</key>
-       <string>1</string>
+       <string>1.0.1</string>
 
        <key>CFBundleShortVersionString</key>
-       <string>1.0</string>
+       <string>1.0.1</string>
 
        <key>URL</key>
-       <string>https://github.com/logandaniels/emoji-tab-icons/raw/v1.0/emoji-tab-icons.safariextz</string>
+       <string>https://github.com/logandaniels/emoji-tab-icons/raw/v1.0.1/emoji-tab-icons.safariextz</string>
 
        <key>Update From Gallery</key>
        <true/>

@@ -7,7 +7,7 @@ After switching from Chrome to Safari, one feature was hard for me to live witho
 This extension lets you add emoji icons to your tabs on a site-by-site basis, to simulate Chrome's tab favicons.
 
 ## Installation
-Download and open [emoji-tab-icons.safariextz](https://github.com/logandaniels/emoji-tab-icons/raw/v1.0/emoji-tab-icons.safariextz).
+Download and open [emoji-tab-icons.safariextz](https://github.com/logandaniels/emoji-tab-icons/raw/v1.0.1/emoji-tab-icons.safariextz).
 
 Unfortunately, installing untrusted extensions is buggy in Safari. When you open the ``.safariextz`` file, Safari will ask you to confirm that you really want to install it. If you're lucky, clicking "Trust" will install the extension. Often, though, nothing will happen and you'll have to try opening the file multiple times or restart Safari before it installs. If you still can't get it to install, [this StackExchange answer](http://apple.stackexchange.com/questions/214760/force-installing-untrusted-safari-extensions/233701#233701) provides a (clunky) workaround.
 
@@ -21,3 +21,14 @@ Any text box that has a smiley face in it, like this:
 ![Emoji text entry](https://github.com/logandaniels/emoji-tab-icons/raw/master/emoji-text-entry.png)
 
 allows emoji input. You can directly type or copy-and-paste an emoji in, or you can **click on the smiley face** to open an emoji picker dialogue.
+
+## Changelog
+
+### 1.0.1 - Oct 9, 2016
+
+- Bugfix: Safari (and even the whole computer?!) would become unresponsive when disabling default tab icons (thanks, /u/iskiran on Reddit!)
+- Bugfix: Preloaded webpages didn't always display an emoji
+
+### 1.0 - May 16, 2016
+
+- Initial release
