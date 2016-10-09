@@ -53,12 +53,12 @@ function addTitleWatcher() {
   observer = new window.WebKitMutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
       var newTitle = mutation.target.textContent;
-      /* If the new title includes our emoji, then either
+      /* If the new title already includes our emoji, then either
          a) this event was triggered by the extension itself, or
          b) the site we're on preserved the emoji we added before
          changing the title. In either case, we should ignore the event.
       */
-      if (newTitle.indexOf(emoji) === -1) {
+      if (emoji && newTitle.indexOf(emoji) === -1) {
         rawTitle = newTitle;
         updateTitle();
       }
