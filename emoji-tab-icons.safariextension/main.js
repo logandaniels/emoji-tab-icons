@@ -2,18 +2,12 @@
 // have one instance of the script per tab
 if (window.top === window) {
 
-var emoji = null;
-var observer = null;
-var settings = null;
-var siteSettings = null;
-var rawTitle = null;
-
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
 function updateTitle() {
-    // Hack: If multiple tabs in Safari share the same prefix,
+    // HACK: If multiple tabs in Safari share the same prefix,
     // Safari hides that prefix from all of the tab titles.
     // To prevent our tab icons from being hidden, we prefix
     // each tab title with a unique number of zero-width characters.
@@ -34,18 +28,39 @@ function getEmoji() {
   }
 }
 
-function getSiteSettings(hostname) {
+function getCurrentSiteSettings() {
+  // format windowLocation, e.g., 
+  // from 'https://www.google.com/other/path?=true'
+  // to   'google.com/other/path?=true'
+  var windowLocation = window.location.href;
+  windowLocation = windowLocation.replace(/.*?:\/\//g, "")
+  windowLocation = windowLocation.replace("www.", "");
+
+  var currentSiteSettings = null;
+
+  // Sort site settings so that less specific rules will match first;
+  // i.e., we want a rule for 'reddit.com/r/apple' to override
+  // a rule for 'reddit.com'
+  settings.sites.sort();
+
   for (var i = 0; i < settings.sites.length; i++) {
-    if (settings.sites[i].hostname == hostname) {
-      return settings.sites[i];
+    // Escape the user-entered pattern so we can use it as a regular expression.
+    // Replacement pattern found at http://stackoverflow.com/a/4371855
+    var pattern = settings.sites[i].hostname.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+
+    // Then UNescape any asterisks, because the user wanted those to be wildcards.
+    // But instead of a full wildcard, accept any characters except for a forward slash,
+    // so that we only match in the actual domain. This way we allow subdomain matching
+    // but avoid having the pattern "google.com" match on "yahoo.com/?query=google.com"
+    pattern = pattern.split('\\*').join('[^/]*');
+    var match = windowLocation.match(pattern);
+    
+    // If it matched at an index other than 0, it's not a prefix, so ignore it
+    if (match !== null && match.index == 0) {
+      currentSiteSettings = settings.sites[i];
     }
   }
-  return null;
-}
-function getHostname() {
-    var hostname = window.location.hostname;
-    hostname = hostname.replace("www.", "");
-    return hostname;
+  return currentSiteSettings;
 }
 
 function addTitleWatcher() {
@@ -67,35 +82,15 @@ function addTitleWatcher() {
   observer.observe(target, { subtree: true, characterData: true, childList: true });
 }
 
-safari.self.addEventListener("message", function(event) {
-    switch (event.name) {
-      case "getSettings":
-        settings = event.message;
-        siteSettings = getSiteSettings(getHostname());
-        emoji = getEmoji();
-        safari.self.tab.dispatchMessage("getTabIconSpacer", emoji);
-        break;
-      case "getTabIconSpacer":
-        spacer = event.message;
-        updateTitle();
-        addTitleWatcher();
-        break;
-    }
-}, false);
-
-rawTitle = document.title;
-
-/* When you type a URL into the address bar, Safari starts
- to preload the page even before you hit enter. If the global
- extension page sends a getSettings response before you hit enter,
- the content script won't actually receive the message, so it won't
- know the extension settings. To fix this issue, we add an event
- listener so that when the preloaded page becomes visible we send
- another getSettings message to the global extension page.
-*/
-
-safari.self.tab.dispatchMessage("getSettings");
 function visibilityListener(e) {
+  /* When you type a URL into the address bar, Safari starts
+   to preload the page even before you hit enter. If the global
+   extension page sends a getSettings response before you hit enter,
+   the content script won't actually receive the message, so it won't
+   know the extension settings. To fix this issue, we use an event
+   listener so that when the preloaded page becomes visible we send
+   another getSettings message to the global extension page.
+  */
   if (!document.hidden) {
     if (!settings) {
       safari.self.tab.dispatchMessage("getSettings");
@@ -103,6 +98,32 @@ function visibilityListener(e) {
     document.removeEventListener("visibilitychange", visibilityListener);
   }
 }
+
+function extensionEventHandler(event) {
+  switch (event.name) {
+    case "getSettings":
+      settings = event.message;
+      siteSettings = getCurrentSiteSettings();
+      emoji = getEmoji();
+      safari.self.tab.dispatchMessage("getTabIconSpacer", emoji);
+      break;
+    case "getTabIconSpacer":
+      spacer = event.message;
+      updateTitle();
+      addTitleWatcher();
+      break;
+  }
+}
+
+var emoji = null;
+var observer = null;
+var settings = null;
+var siteSettings = null;
+var rawTitle = document.title;
+
+safari.self.addEventListener("message", extensionEventHandler, false);
+
+safari.self.tab.dispatchMessage("getSettings");
 document.addEventListener("visibilitychange", visibilityListener);
 
 }

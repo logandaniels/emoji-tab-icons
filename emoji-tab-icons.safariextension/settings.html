@@ -302,7 +302,7 @@ window.addEventListener("load", function () {
     <div class="row">
       <div class="col-md-6 col-md-offset-3 clearfix">
           <h1>Emoji Tab Icons <small>| Settings</small></h1>
-          <small class="pull-right"><a href="mailto:logiedan@gmail.com">Send feedback</a></small>
+          <small class="pull-right"><a href="mailto:logiedan@gmail.com?subject=Emoji Tab Icons Feedback">Send feedback</a></small>
           <div style="height: 0px" class="clearfix"></div>
           <hr class="clearfix">
           <div class="checkbox">
@@ -312,8 +312,14 @@ window.addEventListener("load", function () {
             <div class="editor-disabled" style="display: inline-block; width:100px; position: relative">
               <input id="show-default-icon-input" type="text" data-emojiable="true" disabled>
             </div>
+            <span class="glyphicon glyphicon-question-sign" title="This emoji will be used for any URL that does not appear in the table below."></span>
           </div>
           <div style="margin-top: 50px" class="clearfix"></div>
+          <p style="text-decoration: underline">Notes on URL patterns:</p>  
+          <ul>
+          <li>URLs match as prefixes. The rule 'google.com' will match both 'google.com' and 'google.com/flights', while the rule 'google.com/flights' will only match the latter. In addition, the URL 'google.com' will *not* match when you are on 'mail.google.com', as it is not a prefix.</li>
+          <li>An asterisk (*) can be used as a wildcard to match all subdomains of a website. So the rule '*.google.com' will match 'news.google.com' and 'mail.google.com' (but not 'google.com').</li>
+          </ul>
           <a id="clear-all-button" class="pull-right" href="#">Clear all</a>
           <div>
             <table class="table table-striped">
