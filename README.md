@@ -2,6 +2,11 @@
 
 ![Screenshot](https://github.com/logandaniels/emoji-tab-icons/raw/master/screenshot.png)
 
+# 2018 Update
+We got [sherlocked](https://www.urbandictionary.com/define.php?term=sherlocked)! New in macOS Mojave, Safari 12 [now has built-in tab favicon support](https://www.macworld.com/article/3284407/os-x/macos-mojave-how-to-turn-on-favicons-in-safari-12-tabs.html). Thanks for all your support.
+
+---
+
 After switching from Chrome to Safari, one feature was hard for me to live without: tab icons. Chrome adds a website's favicon as an icon for all tabs you have open for that website. Safari doesn't do this, which makes it hard to tell at a glance what site each of your tabs is on.
 
 This extension lets you add emoji icons to your tabs on a site-by-site basis, to simulate Chrome's tab favicons.
